@@ -29,6 +29,26 @@ class QValueIterationAgent:
     def update(self,s,a,p_sas,r_sas):
         ''' Function updates Q(s,a) using p_sas and r_sas '''
         # TO DO: Add own code
+        """
+        We can retrieve p_sas and r_sas from the model() method in StochasticWindyGridworld
+        For this we need to do something like env = StochasticWindyGridworld(initialize_model=True)
+        Only then are p_sas and r_sas accessible through
+
+        p_sas, r_sas = env.model(s,a)
+
+        This function takes p_sas and r_sas as inputs however. Perhaps it can be called in Q_value_iteration
+        Then we just define the update to Qsa here and worry about p_sas and r_sas later
+
+        Equation 1 is a sum over all next states, therefore we need and array of states, array of p_sas and an array of r_sas
+
+        If that's the case then
+        self.Q_sa[s,a] = np.sum(p_sas * (r_sas + gamma * np.max(self.Q_sa[s,a])))
+        I think
+        """
+
+        "Print the maximum absolute error?"
+
+
         pass
     
     
@@ -54,7 +74,7 @@ def experiment():
     
     # view optimal policy
     done = False
-    s = env.reset()
+    s    = env.reset()
     while not done:
         a               = QIagent.select_action(s)
         s_next, r, done = env.step(a)
