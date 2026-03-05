@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('TkAgg') # 'TkAgg'
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 from matplotlib.patches import Rectangle,Circle,Arrow
 
 class StochasticWindyGridworld:
@@ -88,7 +89,7 @@ class StochasticWindyGridworld:
             raise ValueError("set initialize_model=True when creating Environment")
             
 
-    def render(self,Q_sa=None,plot_optimal_policy=False,step_pause=0.001):
+    def render(self,Q_sa=None,plot_optimal_policy=True,step_pause=0.001):
         ''' Plot the environment 
         if Q_sa is provided, it will also plot the Q(s,a) values for each action in each state
         if plot_optimal_policy=True, it will additionally add an arrow in each state to indicate the greedy action '''
@@ -238,26 +239,44 @@ def full_argmax(x):
     return np.where(x == np.max(x))[0]            
 
 def test():
+    start_time = time.perf_counter()
     # Hyperparameters
-    n_test_steps = 25
-    step_pause   = 0.5
+    n_test_steps = 1500000
+    step_pause   = 0.1
     
     # Initialize environment and Q-array
     env  = StochasticWindyGridworld()
     s    = env.reset()
-    Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
+    Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
+    
+    #print(Q_sa)
     # Test
+    # Keep outputs in memory, to flush once at the end
+    log_lines = []
     for t in range(n_test_steps):
+        #print(s)
         a             = np.random.randint(4) # sample random action    
         s_next,r,done = env.step(a) # execute action in the environment
         p_sas,r_sas   = env.model(s,a)
-        print("State {}, Action {}, Reward {}, Next state {}, Done {}, p(s'|s,a) {}, r(s,a,s') {}".format(s,a,r,s_next,done,p_sas,r_sas))
-        env.render(Q_sa=Q_sa,plot_optimal_policy=False,step_pause=step_pause) # display the environment
+        #print("State {}, Action {}, Reward {}, Next state {}, Done {}, p(s'|s,a) {}, r(s,a,s') {}".format(s,a,r,s_next,done,p_sas,r_sas))
+        #env.render(Q_sa=Q_sa,plot_optimal_policy=True,step_pause=step_pause) # display the environment
+
         if done: 
             s = env.reset()
         else: 
             s = s_next
+        log_lines.append(f"{s}\n")
+        
+    total_execution_time = time.perf_counter() - start_time
+
+    with open("output_Environment.py.log", "w", encoding="utf-8") as f:
+        f.writelines(f"Total execution time: {total_execution_time:.3f} seconds" + "\n")
+        f.writelines(f"Number of steps: {n_test_steps}" + "\n")
+    with open("output_Environment.py.log", "a", encoding="utf-8") as f:
+        f.writelines(log_lines)
     
+
+               
 if __name__ == '__main__':
     test()
