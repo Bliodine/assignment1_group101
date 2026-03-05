@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import time
 from matplotlib.patches import Rectangle,Circle,Arrow
 
+# Begin Class StochasticWindyGridworld ##############################################################
 class StochasticWindyGridworld:
     ''' Stochastic version of WindyGridworld 
         (based on Sutton & Barto, Example 6.5 at page 130, see http://incompleteideas.net/book/RLbook2020.pdf)
@@ -242,6 +243,7 @@ class StochasticWindyGridworld:
                                           self.action_effects[max_action][1]*0.2, width=0.05,color='k')
                 ax_arrow = self.ax.add_patch(new_arrow)
                 self.arrows.append(ax_arrow)
+# End Class StochasticWindyGridworld ##############################################################
 
 def full_argmax(x):
     ''' Own variant of np.argmax, since np.argmax only returns the first occurence of the max '''

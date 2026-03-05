@@ -8,6 +8,7 @@ By Thomas Moerland
 
 import numpy as np
 from Helper import softmax, argmax
+import Environment
 
 class BaseAgent:
 

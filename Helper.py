@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 # from statsmodels.nonparametric.kernel_regression import KernelReg
 
+# Begin Class LearningCurvePlot ##############################################################
 class LearningCurvePlot:
 
     def __init__(self,title=None):
@@ -38,6 +39,8 @@ class LearningCurvePlot:
         ''' name: string for filename of saved figure '''
         self.ax.legend()
         self.fig.savefig(name,dpi=300)
+# End Class LearningCurvePlot ##############################################################
+
 
 def smooth(y, window, poly=2):
     '''
