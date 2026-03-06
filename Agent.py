@@ -10,6 +10,7 @@ import numpy as np
 from Helper import softmax, argmax
 import Environment
 
+# Begin Class BaseAgent ##########################################################################
 class BaseAgent:
 
     def __init__(self, n_states, n_actions, learning_rate, gamma):
@@ -17,15 +18,15 @@ class BaseAgent:
         self.n_actions      = n_actions
         self.learning_rate  = learning_rate
         self.gamma          = gamma
-        self.Q_sa           = np.zeros((n_states,n_actions))
+        self.Q_sa           = np.zeros((n_states,n_actions))    # per assignment, initialize all Q-values to zero
         
-    def select_action(self, s, policy='egreedy', epsilon=None, temp=None):
+    def select_action(self, s, policy='e_greedy', epsilon=None, temp=None):
         
         if policy == 'greedy':
             # TO DO: Add own code
             a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
             
-        elif policy == 'egreedy':
+        elif policy == 'e_greedy':
             if epsilon is None:
                 raise KeyError("Provide an epsilon")
                 
@@ -61,3 +62,5 @@ class BaseAgent:
             returns.append(R_ep)
         mean_return = np.mean(returns)
         return mean_return
+# End Class BaseAgent ##########################################################################
+
