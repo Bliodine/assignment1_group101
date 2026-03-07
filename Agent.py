@@ -8,6 +8,7 @@ By Thomas Moerland
 
 import numpy as np
 from Helper import softmax, argmax
+from Helper import e_greedy
 import Environment
 
 # Begin Class BaseAgent ##########################################################################
@@ -20,25 +21,26 @@ class BaseAgent:
         self.gamma          = gamma
         self.Q_sa           = np.zeros((n_states,n_actions))    # per assignment, initialize all Q-values to zero
         
-    def select_action(self, s, policy='e_greedy', epsilon=None, temp=None):
+    def select_action(self, s, policy='e_greedy' , epsilon=None, temp=None):    # default policy is epsilon-greedy, but one can also select greedy or softmax (Boltzmann) policy
         
         if policy == 'greedy':
-            # TO DO: Add own code
-            a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
-            
+            # Modified by me:
+            # a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
+            a = argmax(self.Q_sa[s]) # Select the best known action to the agent (tie breaking argmax)
+        
         elif policy == 'e_greedy':
             if epsilon is None:
                 raise KeyError("Provide an epsilon")
                 
-            # TO DO: Add own code
-            a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
+            # Modified by me:
+            a = e_greedy(self.Q_sa[s], epsilon) # Use the epsilon-greedy policy I implemented in Helper.py
                  
         elif policy == 'softmax':
             if temp is None:
                 raise KeyError("Provide a temperature")
                 
-            # TO DO: Add own code
-            a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
+            # Modified by me:
+            a = softmax(self.Q_sa[s], temp) # Selecting softmax 
               
         return a
         
