@@ -52,14 +52,14 @@ def experiment(assignment = 0):
     
     ####### Settings
     # Experiment      
-    n_repetitions    = 20
+    n_repetitions    = 20 #20
     smoothing_window = 9 # Must be an odd number. Use 'None' to switch smoothing off!
     plot             = False # Plotting is very slow, switch it off when we run repetitions
     
     # MDP    
-    n_timesteps        = 50001 # Set one extra timestep to ensure evaluation at start and end
-    eval_interval      = 1000
-    max_episode_length = 100
+    n_timesteps        = 50001 #50001 # Set one extra timestep to ensure evaluation at start and end
+    eval_interval      = 1000 #1000
+    max_episode_length = 100 #100
     gamma              = 1.0
     
     # Parameters we will vary in the experiments, set them to some initial values: 
@@ -78,12 +78,13 @@ def experiment(assignment = 0):
                   'mc': 'Monte Carlo',
                   'nstep': 'n-step Q-learning'}
     
+    optimal_episode_return = 100 # set the optimal return per episode you found in the DP assignment here
+    
     ####### Experiments
     if assignment == 0 or assignment == 1:
         #### Assignment 1: Dynamic Programming
         # Execute this assignment in DynamicProgramming.py
-        optimal_episode_return = 100 # set the optimal return per episode you found in the DP assignment here
-    
+        pass
     if assignment == 0 or assignment == 2:   
         #### Assignment 2: Effect of exploration
         policy        = 'egreedy'
@@ -143,10 +144,9 @@ def experiment(assignment = 0):
         learning_curve, timesteps = average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_length, learning_rate, 
                                             gamma, policy, epsilon, temp, smoothing_window, plot, n, eval_interval)
         Plot.add_curve(timesteps,learning_curve,label='Monte Carlo')        
-        Plot.add_hline(optimal_episode_return, label="DP optimum")
+        Plot.add_hline(optimal_episode_return, label="DP optimum")    
+        Plot.save('depth.png')
     
-    Plot.save('depth.png')
-    Plot.show()
     
     total_execution_time = time.perf_counter() - start_time
     with open("output_Q_learning.py.log", "a", encoding="utf-8") as f:
