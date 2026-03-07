@@ -6,7 +6,10 @@ Leiden University, The Netherlands
 By Thomas Moerland
 """
 
+import time
+
 import numpy as np
+# from Helper import argmax, softmax
 from Environment import StochasticWindyGridworld
 from Agent import BaseAgent
 
@@ -22,9 +25,12 @@ class QLearningAgent(BaseAgent):
         
 # End Class QLearningAgent ##########################################################################
 
+
 def q_learning(n_timesteps, learning_rate, gamma, policy='egreedy', epsilon=None, temp=None, plot=True, eval_interval=500):
     ''' runs a single repetition of q_learning
     Return: rewards, a vector with the observed rewards at each timestep ''' 
+    
+    log_lines = []
     
     env = StochasticWindyGridworld(initialize_model=False)
     eval_env = StochasticWindyGridworld(initialize_model=False)
@@ -55,10 +61,16 @@ def q_learning(n_timesteps, learning_rate, gamma, policy='egreedy', epsilon=None
             eval_timesteps.append(t+1) # Append the corresponding timestep for later observation
         
         if done: # If the episode is done (terminal state), reset the environment to start a new episode
-            s = env.reset() # Reset the environment to start a new episode    
-            relative_timesteps = t-relative_timesteps
-            print("Goal reached after {} timesteps".format(t+1))
+            s = env.reset() # Reset the environment to start a new episode               
+            log_lines.append(f"Goal after {t-relative_timesteps} timesteps. #Iteraion: {t+1}. Policy: {policy}\n")
+            #print("Goal reached (terminal state) after {} timesteps. Absolute timesteps: {}. Policy: {}".format(t-relative_timesteps, t+1, policy))
+            relative_timesteps = t
 
+        
+    with open("output_Q_learning.py.log", "a", encoding="utf-8") as f:
+        f.writelines(log_lines)
+        f.write("\n")
+            
     return np.array(eval_returns), np.array(eval_timesteps)   
 
 def test():
