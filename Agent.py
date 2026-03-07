@@ -7,8 +7,8 @@ By Thomas Moerland
 """
 
 import numpy as np
-from Helper import softmax, argmax
-from Helper import e_greedy
+# from Helper import softmax, argmax
+from Helper import egreedy
 import Environment
 
 # Begin Class BaseAgent ##########################################################################
@@ -21,26 +21,28 @@ class BaseAgent:
         self.gamma          = gamma
         self.Q_sa           = np.zeros((n_states,n_actions))    # per assignment, initialize all Q-values to zero
         
-    def select_action(self, s, policy='e_greedy' , epsilon=None, temp=None):    # default policy is epsilon-greedy, but one can also select greedy or softmax (Boltzmann) policy
+    def select_action(self, s, policy='egreedy' , epsilon=None, temp=None):    # default policy is epsilon-greedy, but one can also select greedy or softmax (Boltzmann) policy
         
         if policy == 'greedy':
             # Modified by me:
             # a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
             a = argmax(self.Q_sa[s]) # Select the best known action to the agent (tie breaking argmax)
         
-        elif policy == 'e_greedy':
+        elif policy == 'egreedy':
             if epsilon is None:
                 raise KeyError("Provide an epsilon")
                 
             # Modified by me:
-            a = e_greedy(self.Q_sa[s], epsilon) # Use the epsilon-greedy policy I implemented in Helper.py
+            a = egreedy(self.Q_sa[s], epsilon) # Use the epsilon-greedy policy I implemented in Helper.py
                  
         elif policy == 'softmax':
             if temp is None:
                 raise KeyError("Provide a temperature")
                 
             # Modified by me:
-            a = softmax(self.Q_sa[s], temp) # Selecting softmax 
+            a = softmax(self.Q_sa[s], temp) # Selecting softmax        
+        else:
+            raise KeyError("Unknown policy type")
               
         return a
         
