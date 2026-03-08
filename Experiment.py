@@ -36,7 +36,7 @@ def average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_len
         returns_over_repetitions.append(returns)
         
     print('Running one setting takes {} minutes'.format((time.time()-now)/60))
-    learning_curve = np.mean(np.array(returns_over_repetitions),axis=0) # average over repetitions  
+    learning_curve = np.mean(np.array(returns_over_repetitions), axis=0) # average over repetitions  
     if smoothing_window is not None: 
         learning_curve = smooth(learning_curve,smoothing_window) # additional smoothing
     return learning_curve, timesteps  
