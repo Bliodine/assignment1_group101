@@ -35,7 +35,7 @@ def average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_len
         elif backup == 'mc':
             returns, timesteps = monte_carlo(n_timesteps, max_episode_length, learning_rate, gamma, 
                    policy, epsilon, temp, plot, eval_interval)
-
+        
         returns_over_repetitions.append(returns)
         
     print('Running one setting takes {} minutes'.format((time.time()-now)/60))
@@ -43,6 +43,13 @@ def average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_len
     if smoothing_window is not None: 
         learning_curve = smooth(learning_curve,smoothing_window) # additional smoothing
     return learning_curve, timesteps  
+
+def _fmt(v):
+    """Format numbers safely for filenames."""
+    if isinstance(v, float):
+        return f"{v:.3g}".replace(".", "p")
+    return str(v)
+
 
 def experiment(assignment = 0):
     start_time = time.perf_counter()
@@ -57,7 +64,7 @@ def experiment(assignment = 0):
     plot             = False # Plotting is very slow, switch it off when we run repetitions
     
     # MDP    
-    n_timesteps        = 50001 #50001 # Set one extra timestep to ensure evaluation at start and end
+    n_timesteps        = 30001 #50001 # Set one extra timestep to ensure evaluation at start and end
     eval_interval      = 1000 #1000
     max_episode_length = 100 #100
     gamma              = 1.0
@@ -89,7 +96,7 @@ def experiment(assignment = 0):
         #### Assignment 2: Effect of exploration
         policy        = 'egreedy'
         epsilons      = [0.03,0.1,0.3]
-        learning_rate = 0.1
+        learning_rate = 0.5        
         backup        = 'q'
         Plot          = LearningCurvePlot(title = r'Exploration: $\epsilon$-greedy versus softmax exploration')    
         Plot.set_ylim(-100, 100)
@@ -101,14 +108,24 @@ def experiment(assignment = 0):
             Plot.add_curve(timesteps,learning_curve,label=r'$\epsilon$-greedy, $\epsilon $ = {}'.format(epsilon))    
 
         policy = 'softmax'
-        temps  = [0.01,0.1,1.0]
+        temps  = [0.01,0.05,0.1]
 
         for temp in temps:
             learning_curve, timesteps = average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_length, learning_rate, 
                                                 gamma, policy, epsilon, temp, smoothing_window, plot, n, eval_interval)
             Plot.add_curve(timesteps,learning_curve,label=r'softmax, $ \tau $ = {}'.format(temp))
         Plot.add_hline(optimal_episode_return, label="DP optimum")
-        Plot.save('exploration.png')
+        
+        eps_txt = "-".join(_fmt(e) for e in epsilons)
+        temp_txt = "-".join(_fmt(t) for t in temps)
+        filename = (
+            f"exploration_lr{_fmt(learning_rate)}"
+            f"_eps{eps_txt}_temp{temp_txt}"
+            f"_rep{n_repetitions}_ts{n_timesteps}_eval{eval_interval}.png"
+        )
+        Plot.save(filename)
+
+        #Plot.save('exploration.png')
     
     if assignment == 0 or assignment == 3:        
         ###### Assignment 3: Q-learning versus SARSA
