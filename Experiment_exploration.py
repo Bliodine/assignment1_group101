@@ -64,7 +64,8 @@ def experiment(assignment = 0):
     plot             = False # Plotting is very slow, switch it off when we run repetitions
     
     # MDP    
-    n_timesteps        = 30001 #50001 # Set one extra timestep to ensure evaluation at start and end
+    #n_timesteps        = 50001 #50001 # Set one extra timestep to ensure evaluation at start and end
+    n_timesteps        = 15001 #50001 # Set one extra timestep to ensure evaluation at start and end
     eval_interval      = 1000 #1000
     max_episode_length = 100 #100
     gamma              = 1.0
@@ -95,8 +96,10 @@ def experiment(assignment = 0):
     if assignment == 0 or assignment == 2:   
         #### Assignment 2: Effect of exploration
         policy        = 'egreedy'
-        epsilons      = [0.03,0.1,0.3]
-        learning_rate = 0.5        
+        #epsilons = [0.03,0.1,0.3]
+        epsilons      = [0.00001,0.0001,0.001]
+        #learning_rate = 0.1        
+        learning_rate = 0.3        
         backup        = 'q'
         Plot          = LearningCurvePlot(title = r'Exploration: $\epsilon$-greedy versus softmax exploration')    
         Plot.set_ylim(-100, 100)
@@ -108,7 +111,8 @@ def experiment(assignment = 0):
             Plot.add_curve(timesteps,learning_curve,label=r'$\epsilon$-greedy, $\epsilon $ = {}'.format(epsilon))    
 
         policy = 'softmax'
-        temps  = [0.01,0.05,0.1]
+        #temps = [0.01,0.1,1.0]
+        temps  = [0.0001,0.001,0.01]
 
         for temp in temps:
             learning_curve, timesteps = average_over_repetitions(backup, n_repetitions, n_timesteps, max_episode_length, learning_rate, 
