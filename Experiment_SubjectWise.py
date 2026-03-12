@@ -11,6 +11,7 @@ from datetime import datetime
 import numpy as np
 import time
 
+from Environment import StochasticWindyGridworld
 from Q_learning import q_learning
 from SARSA import sarsa
 from Nstep import n_step_Q
@@ -49,6 +50,14 @@ def _fmt(v):
     if isinstance(v, float):
         return f"{v:.3g}".replace(".", "p")
     return str(v)
+
+
+def _two_goals_filename_segment(goal_locations):
+    """Return filename segment only when exactly two goals are present."""
+    if len(goal_locations) != 2:
+        return ""
+    coords_txt = "".join(f"{goal[0]}{goal[1]}" for goal in goal_locations)
+    return f"_2Goals_({coords_txt})"
 
 
 def experiment(assignment = 0):
@@ -95,11 +104,12 @@ def experiment(assignment = 0):
         pass
     if assignment == 0 or assignment == 2:   
         #### Assignment 2: Effect of exploration
+        env = StochasticWindyGridworld()
         policy        = 'egreedy'
         #epsilons = [0.03,0.1,0.3]
         epsilons      = [0.00001,0.0001,0.001]
         #learning_rate = 0.1        
-        learning_rate = 0.3        
+        learning_rate = 0.39        
         backup        = 'q'
         Plot          = LearningCurvePlot(title = r'Exploration: $\epsilon$-greedy versus softmax exploration')    
         Plot.set_ylim(-100, 100)
@@ -122,8 +132,9 @@ def experiment(assignment = 0):
         
         eps_txt = "-".join(_fmt(e) for e in epsilons)
         temp_txt = "-".join(_fmt(t) for t in temps)
+        goals_txt = _two_goals_filename_segment(env.goal_locations)
         filename = (
-            f"exploration_lr{_fmt(learning_rate)}"
+            f"exploration{goals_txt}_lr{_fmt(learning_rate)}"
             f"_eps{eps_txt}_temp{temp_txt}"
             f"_rep{n_repetitions}_ts{n_timesteps}_eval{eval_interval}.png"
         )
