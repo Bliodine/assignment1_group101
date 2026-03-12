@@ -58,12 +58,12 @@
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Another fun title to think of...}
+\icmltitlerunning{Tabular Reinforcement Learning Test & Analysis}
 
 \begin{document}
 
 \twocolumn[
-\icmltitle{Tabular Reinforcement Learning : Catchy title pending}
+\icmltitle{Tabular Reinforcement Learning: \textit{a small agent in a big world}}
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -117,44 +117,28 @@
 \newpage
 \begin{abstract}
 
-This article is about implementing Reinforcement Learning various algorithms on a grid world problem with stochastic factors. The algorithms are run in enough explained iterations to use the previous learnings, to be able to converge to the terminal state in less steps. Every algorithm is also run multiple times to generate more results so as to be more reliably comparable with the other algorithms. The approaches and algorithms included are "\textbf{Dynamic Programming}", "\textbf{Exploration Techniques}", "\textbf{On-policy versus Off-policy}", "\textbf{Depth of Target}".
+This article is about implementing Reinforcement Learning various algorithms on a grid world problem with stochastic factors. The algorithms are run in enough explained iterations to use the previous learnings, to be able to converge to the terminal state in less steps. Every algorithm is also run multiple times to generate more results so as to be more reliably comparable with the other algorithms. The approaches and algorithms included are "\textbf{Dynamic Programming (DP)}", "\textbf{Exploration Techniques}", "\textbf{On-policy versus Off-policy}" and "\textbf{Depth of Target}".
 \end{abstract}
 
 \section{Introduction} \label{sec:introduction}
-Finding an optimal path in a given situation can be modeled using tabular reinforcement learning (RL). In this regime of RL the state and actions spaces are discrete. Relatively low-dimensional "grid worlds" in this regime allow for both state and action spaces to be stored in their entirety. Here we will cover several methods for finding the optimal path through a certain environment.  
+Finding an optimal path in a given situation can be modelled using tabular reinforcement learning (RL). In this regime of RL the state and actions spaces are discrete. Relatively low-dimensional "grid worlds" in this regime allow for both state and action spaces to be stored in their entirety. Here we will cover several methods for finding the optimal path through a certain environment.  
 
 In \autoref{sec:theory} the theory relevant for the methods used is covered. This will be based on the work in \cite{RL_book}.
 In \autoref{sec:experiments} the different experiments applied to find the optimal path through this environment are covered and their results are presented. In \autoref{sec:discussion} these results are discussed. We end with a reflection in \autoref{sec:conclusion}
 
 \section{Theory}\label{sec:theory}
-Let's cover some terms that will be used throughout this work. An agent will make a sequence of actions to traverse an environment and reach a goal. Such a problem is therefore also called a Sequential Decision Problem (SDP). Though in real life, humans often let their experience of previous decisions lead their following decisions this is not the case in Markov Decisions Processes (MDPs). In MDPs the next action taken is solely based on the information available at a given state. By tackling an SDP using an MDP allows us to straightforwardly model an agent's behaviour. Taking all past experiences into account, becomes complicated. To model an SDP as an MDP the following things are needed: the actions the agent can take (the action space $A$), the states the environment can be in (the state space $S$), the rewards associated with each state $r_s$, the probability to transition from one state ($s$) to another ($s'$), given an action ($a$) denoted by $T(s'|a,s)$ and a discount factor $\gamma$ which decides how much future possible rewards are weighted into the decision making process. So how do we use this information to decide what are good actions to take? First we need to know what the return $R$ means. It is given by the following equation:
-\begin{equation}
-    R = \sum_{i=0}^N r_i \gamma^i
-    \label{eq:return}
-\end{equation}
-With $N$ the number of steps taken by the agent and $r_i$ the reward received at time step $i$. This leads us to the state-action value function $Q(s,a)$. This is the expected return $R$ if a given policy $\pi(a|s)$ is used to decide what action to take after being in state $s$ and taking action $a$. Or, in equation form
-\begin{equation}
-    Q^\pi(s,a) = \mathds{E}\left[\sum_{i=0}^N\gamma^i \cdot r_{t+i}|s_t=s,a_t=a\right]
-    \label{eq:state_action_value}
-\end{equation}
-With $r_t$ the reward received, $s_t$ the environment state and $a_t$ the action taken at timestep $t$. The goal is to find the optimal policy which maximises this expected return, or
+To be able to find the optimal path through the environment used, this sequential decision problem (SDP) will be modelled as a Markov decision process (MDP). An agent's next action is taken solely based on the information available at a given state. Taking all past experiences into account, becomes complicated. To model an SDP as an MDP the following things are needed: the action space $A$, the state space $S$, the transition probability $T(s'|a,s)$, the reward associated with state $s$: $r_s$ and the discount factor $\gamma$. The goal is to find the optimal policy $\pi^\star$ which maximises the expected return, or
 \begin{equation}
     \pi^\star = \arg\max_{a\in A} Q^\star(s,a)
     \label{eq:RL_goal}
 \end{equation}
+With $Q^\star(s,a)$ the optimal state-action value function. $Q^\pi(s,a)$ is the expected return if a given policy $\pi(a|s)$ is used to decide what action to take after being in state $s$ and taking action $a$.
 
 \section{Experiments}\label{sec:experiments} %(setup and results)
 Let's now go over the environment that will be used throughout this report. The environment in which the agent is moving around is a 7x10 grid world. The agent starts at a starting position (0,3). A goal location is set at (7,3) and can be moved around. Reaching the goal state yields a reward of $100$. Reaching any other state yields a reward of $-1$. In columns 3, 4, 5 and 8 there's a 90\% change that the agent will be moved upwards one tile, due to a stochastically present wind. In columns 6 and 7 this results in an upwards movement of two tiles with the same probability.
 
 \subsection{Dynamic programming}\label{subsec:dynamic_programming}
-A method of constructing the state-action value function $Q(s,a)$ is by using the Value Iteration algorithm (see \autoref{alg:Q_value_iteration}). This algorithm loops over both state and action spaces to iteratively improve the $Q$ table using \autoref{eq:dynamic_programming_Q_table} until the state-actions values don't change much anymore (convergence is reached). 
-
-\begin{equation}
-    Q(s,a) \leftarrow \sum_{s'}\left[p(s'|s,a) \cdot \left(r(s,a,s') + \\ \gamma \max_{a'}Q(s',a')\right)\right]
-    \label{eq:dynamic_programming_Q_table}
-\end{equation}
-Where $p(s'|s,a)$ is the transition probability mentioned in \autoref{sec:theory}.
-
+A method of constructing the state-action value function $Q(s,a)$ is by using the Value Iteration algorithm (see \autoref{alg:Q_value_iteration}). This algorithm loops over both state and action spaces to iteratively improve the $Q$ table until the state-actions values don't change much any more (then convergence is reached). 
 The output of \autoref{alg:Q_value_iteration} is an optimal (within the constraints of the parameters used) $Q$ table which can be used to help the agent reach the goal. In a given state $s$, the next action $a'$ is chosen based on the action that maximises the $Q(s,a')$ value. This is called a \textit{greedy} policy. This algorithm requires the transition probability to be known from the environment and is therefore a model-based solution method for the MDP. 
 
 
@@ -163,16 +147,16 @@ The converged optimal value at the start state can be found using the value func
     V^\pi(s) = \mathds{E}\left[\sum_{i=0}^N \gamma^i \cdot r_{t+i}|s_t = s \right]
     \label{eq:value_function}
 \end{equation}
-With $\gamma$ the discount factor and $N$ the number of steps taken until the goal is reached. This can be used in $V(s_\text{initial})$ to get an expected return for the entire episode (from the initial state up to when the goal is reached).
+With $\gamma$ the discount factor, $r_t$ the reward received at timestep $t$ and $N$ the number of steps taken until the goal is reached. This can be used in $V(s_\text{initial})$ to get an expected return for the entire episode (from the initial state up to when the goal is reached).
 
-\subsubsection{Hyperparameters}
-The main hyperparameters used in this experiment are the discount factor $\gamma$ and the threshold $\eta$. Setting $\gamma$ lower will mean that the $Q$ table is built up by taking only the closest rewards into account (see also \autoref{fig:DP_low_gamma}). Setting $\gamma$ equal to one, means all future rewards are taken into account equally. Setting $\eta$ higher means that convergence is reached earlier. If the steps to states other than the terminal state awarded $0$ instead of $-1$, the shorted path could still be found using $\gamma<1$. By only considering a few states ahead too much exploring is discouraged: this will yield no reward.
+The main hyperparameters used in this experiment are the discount factor $\gamma$ and the threshold $\eta$. Setting $\gamma$ lower will mean that the $Q$ table is built up by taking only the closest rewards into account (see also \autoref{fig:DP_low_gamma}). Setting $\gamma$ equal to one, means all future rewards are taken into account equally. Setting $\eta$ higher means that convergence is reached earlier. If the steps to states other than the terminal state awarded $0$ instead of $-1$, the shorted path could still be found using $\gamma<1$. By only considering a few states ahead, too much exploring is discouraged: this would yield no reward.
 
-\subsubsection{Results}
-Using $\gamma=0.99$ and $\eta=70.$ \autoref{alg:Q_value_iteration} converges in 12 iterations. Then applying \autoref{eq:value_function} on the initial state yields $V(s_\text{initial})\approx 70$. We can also calculate the average reward per timestep using the reward in the terminal state ($R_\text{terminal}$), the fact that each step to a different state yields a reward of $-1$ and the number of steps taken ($N_\text{steps}$). The average reward per timestep is then
+Using $\gamma=0.99$ and $\eta=70.$ \autoref{alg:Q_value_iteration} converges in 12 iterations. Then applying \autoref{eq:value_function} on the initial state yields $V(s_\text{initial})\approx 70$. The average reward per timestep can be calculated using the reward in the terminal state ($R_\text{terminal}$), the fact that each step to a different state yields a reward of $-1$ and the number of steps taken ($N_\text{steps}$). The average reward per timestep is then
+\vspace{-2mm}
 \begin{equation}
     \bar{r_t} = \left(100 + (n_\text{steps}-1)\cdot -1\right)/n_\text{steps}
     \label{eq:average_reward_per_timestep}
+    \vspace{-1mm}
 \end{equation}
 A single step is subtracted from $n_\text{steps}$ inside the equation because the final step into the terminal state doesn't yield a reward of $-1$ but one of $100$ as previously stated.
 On average, using the same values for the hyperparameters $\gamma$ and $\eta$, it takes about 17 steps to reach the terminal state. This means that $\bar{r_t}\approx 4.9$.
@@ -180,117 +164,133 @@ On average, using the same values for the hyperparameters $\gamma$ and $\eta$, i
 \begin{figure}[H]
      \centering
      \includegraphics[width=\linewidth]{Figures/step1_VI_at_end.pdf}
+     \vspace{-5mm}
      \caption{After 12 iterations of value iteration, convergence is reached (when using $\gamma=0.99$ and $\eta=70.$). For ealier stages of the algorithm see \autoref{fig:value_iteration_beginning} and \autoref{fig:value_iteration_halfway}. The agent will move to the right, end up in the top-right corner due to the stochastic wind, then work its way to the bottom-right and then to the left and up towards the goal.} 
      \label{fig:value_iteration_end}
  \end{figure}
 
 \subsection{Exploration}\label{subsec:exploration}
-The exploration experiment is all about choosing the action (select\_action) in the current state, either the same as the previous trials (greedy) or choosing a new action with a risk factor. The selection between these two is performed in 2 "\textbf{e-greedy}" and "\textbf{Boltzman (softmax)}" methods. The stochasticity is applied through one of these methods. Then we compare how these two methods relatively perform by drawing a plot. 
+In this experiment the next action will be chosen either as before (greedy) or by choosing a different action with a small chance. The selection between these two is done using either "\textbf{e-greedy}" (see \autoref{eq:epsilon_greedy}) or "\textbf{Boltzman (softmax)} (see \autoref{eq:boltzmann})" methods. The stochasticity is applied through one of these methods. The relative performance between these two methods will be compared by drawing a plot (see\autoref{fig:tuned_exploration_hp}).
 
-
-Here is the action selection policy formula for the \textbf{e-greedy} method:
-\[
+\vspace{-7mm}
+\begin{equation}
 \pi(a \mid s)=
 \begin{cases}
 1.0 - \epsilon \cdot \dfrac{|A|-1}{|A|}, 
-& \text{if } a=\arg\max_{b\in A}\hat{Q}(s,b):\space\ Exploitation \\[6pt]
+& \text{if } a=\arg\max_{b\in A}\hat{Q}(s,b) \\
 \dfrac{\epsilon}{|A|}, 
-& \text{otherwise}:\space\space\space Exploration
+& \text{otherwise}
 \end{cases}
-\]
-The upper case covers exploitation and the lower case covers exploration which chooses 1 from the rest of non-greedy actions. And the action selection policy formula for the \textbf{Boltzman} method:
-\[
+\label{eq:epsilon_greedy}
+\vspace{-2mm}
+\end{equation}
+The upper case covers exploitation and the lower case covers exploration which chooses one from the rest of non-greedy actions.
+\begin{equation}
 \pi(a \mid s)=
 \frac{e^{\hat{Q}(s,a)/\tau}}
 {\sum_{b\in A} e^{\hat{Q}(s,b)/\tau}}
-\]
- It also gives a probability to every possible action.
- 
+\label{eq:boltzmann}
+\end{equation}
+ It also gives a probability to every possible action. In this experiment the $Q$ table is constructed using tabular Q-learning (see \autoref{alg:tabular_q_learning}). 
+The hyperparameters in experiments generally include \textbf{learning rate $\alpha$}, \textbf{exploration rates} $\epsilon$ and $\tau$ for e-greedy and softmax methods respectively, \textbf{number of timesteps} (budget), $\gamma$ (\textbf{discount factor}), and \textbf{evaluation interval}. We try to tune them as far as we can. The hyperparameters and figures and expanded interpretation for the first and last trials are in the appendix section, and only the summary interpretation is done here.
 
-\subsubsection{Hyperparameters}
-The hyperparameters in experiments generally include \textbf{learning rate $\alpha$}, \textbf{exploration rates} $\epsilon$ and $\tau$ for e-greedy and softmax methods respectively, \textbf{number of timesteps} (budget), $\gamma$ (\textbf{discount factor}), and \textbf{evaluation interval}. We try to tune them as far as we can. The hyperparameters and figures for the first and last trials are in the appendix section, and I only do the final interpretation here.
-\paragraph{Hyperparameters Optimization} (Numerical discussion in the Appendix section)
-The initial number of timesteps (50001) was too large for the need (tangible convergence), and it could be reasonable to start with a bigger value, and then decrease it after observing the results, but subsequently we decreased it. Also, a faster convergence was obviously more desirable so we tried to increase learning rate and adjust the exploration rates accordingly. Increasing the learning rate and keeping other parameters static, as expected lead to two results:
-1. Faster convergence
-2. Volatile behavior of some curves, slow convergence (less curve slope), oscillation, and less satisfactory \textbf{Returns}
-We reacted to this by decreasing the exploration rates. This fixed the  problem. Meaning the curves not only converged faster (less timesteps), but also had steady and smooth behavior. The evaluation interval was not changed to keep the plots smoother (Numerical discussion in the Appendix section).
+\textbf{Hyperparameters Optimization}  \\
+To hasten convergence, the learning rate could be increased and the exploration rates adjusted.
+Increasing the learning rate and keeping other parameters static, as expected, lead to two results:
+1. Faster convergence (Pro)
+2. Volatile behaviour of some curves, slow convergence, oscillation, and less satisfactory \textbf{Returns} (Con)
+We reacted to this by decreasing the exploration rates. This resulted in faster convergence, but also had steady and smooth behaviour. The evaluation interval was not changed to keep the plots smoother (for a numerical overview, see also \autoref{app:hyperparameter_tuning}).
+To see the influence of an additional terminal state with a reward of $5$ on the agent's behaviour, three experiments were run: one for every additional location (added at [3,2], [7,4] and [8,4]). The impact is that the mean of returns, convergence speed, and hyperparameter effects change. The location of this additional goal strongly influences its effect. Some locations (closer to the starting position, for example) are more likely to be visited. See \autoref{fig:additional_goal_1}, \autoref{fig:additional_goal_2} and \autoref{fig:additional_goal_3} for some visualisations of the impact of this additional goal.
 
-\begin{itemize}
-    \item We also added another goal to the environment with a different reward value. It is also a terminal state, so when the \textbf{Agent} reaches it, the movement stops. This obviously changes the curve. We took the positions [3,2], [7,4], and [8,4] one at a time (3 experiments) for the second goal and a reward value of 5. The change is that the mean of returns, convergence speed, and hyperparameter effects change. But everything depends so much on where the second goal, and what its reward value are. If it is generally much more likely to be visited, then the Returns will orient so much to it reward value. Further discussion in the Appendix due to the space limitation. 
-\end{itemize}
-
+\begin{figure}[H]
+    \centering
+    % \vspace{-5mm}
+    \includegraphics[width=\linewidth]{Figures/exploration.pdf}
+    \vspace{-8mm}
+    \caption{Performance of the $\epsilon$-greedy and Boltzmann policies for different exploration rates. Other hyperparameters used are: 50,001 timesteps, a learning rate of 0.1}
+    \label{fig:exploration_results}
+\end{figure}
 
 \subsection{Back-up: On-policy versus off-policy target}\label{subsec:backup_on_off}
 
 An important aspect that influences the process of tabular reinforcement learning is the way that the state-action value function is updated. There are two ways to execute this back-up. The first is off-policy, where a bootstrapped value is given by the best possible next action, according to the Q-table. This is how the Q-learning algorithm works (see \autoref{alg:tabular_q_learning}). The other way is on-policy, where the value is not determined by the best possible action, but by the action actually taken by the agent. This approach is used by the RL algorithm SARSA (see \autoref{alg:SARSA}). After initializing, SARSA takes actions based on the current policy and observes the resulting next state and reward. Then, the Q-value of the current state-action pair is updated, using the action taken by the agent.
 
- \begin{figure}[H]
-     \centering
-     \includegraphics[width=\linewidth]{Figures/on_off_policy.pdf}
-     \caption{Comparing different approaches of target back-up. Q-learning uses an off-policy back-up with and SARSA uses an on-policy back-up. Both algorithms are tested with learning rates 0.03, 0.1 and 0.3.} 
-     \label{fig:off_on_policy}
- \end{figure}
-
 \subsection{Back-up: Depth of target}\label{subsec:backup_depth}
 
 When considering back-up, deciding on off-policy versus on-policy is not the only choice that impacts the performance of the agent. So far, when computing the target value, only the next action was taken into consideration. The agent was only looking one step forward, so to speak. But, it is also possible to look further ahead before bootstrapping, summing rewards into a trace with a discount for rewards that lie further in the future. These methods are known as N-step methods, with depth n denoting how many step the agent looks into the future. One of these is N-step Q-learning (see \autoref{alg:N_step_q_learning}). It collects a full episode before updating the Q-value of each encountered state-action pair, summing over the discounted rewards.
 
-An extreme case of N-step Q-learning is the Monte Carlo update, where the update uses the sum of all discounted rewards until the end of the episode, without any bootstrapping. The algorithm for this approach is shown in \autoref{alg:Monte_Carlo}. Just like the N-step Q-learning algorithm, this algorithm first collects a full episode and then loops backwards through the encountered state-action pairs, accumulating the sum of discounted rewards in reverse and updating the Q-table accordingly.
-
-
+An extreme case of N-step Q-learning is the Monte Carlo (MC) update, where the update uses the sum of all discounted rewards until the end of the episode, without any bootstrapping. The algorithm for MC is shown in \autoref{alg:Monte_Carlo}. Just like in N-step Q-learning, MC first collects a full episode. Then it loops backwards through the encountered state-action pairs, stacking the sum of discounted rewards in reverse and updating the Q-table accordingly.
 
  \begin{figure}[H]
      \centering
-     \includegraphics[width=\linewidth]{Figures/depth.pdf}
-     \caption{Comparing different back-up depths using depths of 1, 3, 10 steps and a Monte Carlo update, which considers all steps up to the end of the episode.} 
-     \label{fig:back_up_depth}
+     \vspace{-3mm}
+     \includegraphics[width=\linewidth]{Figures/on_off_policy.pdf}
+     \vspace{-8mm}
+     \caption{Comparing different approaches of target back-up. Q-learning uses an off-policy back-up with and SARSA uses an on-policy back-up. Both algorithms are tested with learning rates 0.03, 0.1 and 0.3.} 
+     \label{fig:off_on_policy}
  \end{figure}
 
+ \begin{figure}[H]
+     \centering
+     \vspace{-8mm}
+     \includegraphics[width=\linewidth]{Figures/depth.pdf}
+     \vspace{-8mm}
+     \caption{Comparing different back-up depths using depths of 1, 3 and 10 steps and a Monte Carlo update, which considers all steps up to the end of the episode.} 
+     \label{fig:back_up_depth}
+ \end{figure}
+\vspace{-8mm}
 \section{Discussion}\label{sec:discussion}
-\todo{Curse of dimensionality}
 \subsection{Dynamic programming}\label{subsec:discussion_dynamic_programming}
 The optimal $Q$ table found using $\gamma=0.99$ and $\eta=70.$ is visualised in \autoref{fig:value_iteration_end}. The blue square indicates the initial state and the green square indicates the terminal state. The arrows indicate the greedy action to take in each state. No reward can be received after the agent reaches the goal state: no action is preferred so each action is indicated with an arrow. To ensure that the agent doesn't move away from the goal state, the transition probability is defined such that each action from the goal state will return the goal state: no movement away from the goal state is permitted. Changing the goal state will yield a different $Q$ table, because different actions will be required to reach this changed goal state (see for example \autoref{fig:DP_other_goal}). 
 
-Using \autoref{alg:Q_value_iteration} to find the optimal policy $\pi^\star$ works well \textbf{if} we can afford its high computational cost and we have access to $T(s'|a,s)$.
+Using \autoref{alg:Q_value_iteration} to find the optimal policy $\pi^\star$ works well \textbf{if} we can afford its high computational cost and we have access to $T(s'|a,s)$. In higher dimensions, the cost of this method will not be worth it (the curse of dimensionality), so other methods need to be applied to deal with this scenario.
 
 
 \subsection{Exploration}\label{subsec:discussion_exploration}
- For choosing the exploration method, it boils down to what values we choose for $\epsilon$ and $\tau$. If they are chosen well enough, there is not much performance difference between these two methods. Since I changed both to get a relatively optimal result, I will note my selected values in the Appendix section.
-When we turn the reward value for the goal to 0, I believe the convergence will occur with the same speed, though the mean of returns will be different and for high values like 100, the curve goes upwards with a large slope and at some point it becomes descending, and in conclusion, I do not believe changing the rewards would have so much effect on the convergence, so long as the goal reward value is bigger than the other steps 
-Questions from assignment: \\
+ If $\epsilon$ and $\tau$ are chosen well enough, there is not much performance difference between using the $\epsilon$-greedy or Boltzmann policy, but Boltzman is generally very slightly faster in execution time. This is in my opinion because the action selection probability for Boltzman is directly dependent to learned values unlike $\epsilon$-greedy which is always constant.
+ Since I changed both multiple times to get a relatively optimal result, I will note my selected values in the Appendix section.
+When we turn the reward value for the goal to 0, I believe the convergence will occur with the same speed, though the mean of returns will be different. For large reward values like 100, the curve goes upwards with a large slope, and at some point it becomes descending. That is because the value surpasses the convergence value first because of initial bias in the results. 
+In conclusion, I do not believe changing the rewards would have an effect on the convergence, so long as the goal reward value is bigger than the other steps (which is rationally supposed to be so).
 
 \subsection{ Back-up: On-policy versus off-policy target}\label{subsec:discussion_backup_on_off}
 
-Considering the comparison of Q-learning and SARSA for different learning rates in \autoref{fig:off_on_policy}, the off-policy Q-learning approach with a learning rate of 0.1 seems to yield the highest return with the most consistency, implying that the off-policy approach of updating with the best action results in better training of the agent due to the direct learning of the optimal policy, whereas SARSA accounts for more exploration, learning a suboptimal but more realistic policy.
-The on-policy (SARSA) approach would be more useful in the case that exploration is dangerous, and the safest path to the reward is the way to go.
+Considering the comparison of Q-learning and SARSA for different learning rates in \autoref{fig:off_on_policy}, the off-policy Q-learning approach with a learning rate of 0.1 seems to yield the highest return with the most consistency, implying that the off-policy approach of updating with the best action results in better training due to the direct learning of the optimal policy, whereas SARSA uses more exploration, learning a suboptimal but more realistic policy. The on-policy approach would be useful for a case where exploration is dangerous, and the safest path to reward is the way to go.
 
-A learning rate of 0.1 seems to balance stability and learning speed, as a lower $\alpha$ would converge to slow and a higher $\alpha$ would overshoot the values in the Q-table. Note that for the same learning rates the learning curves of Q-learning and SARSA look similar, indicating that the learning rate dominated the learning process compared to the approach used to update the Q-table.
+A learning rate of 0.1 seems to balance stability and learning speed, as a lower $\alpha$ would converge too slow and a higher $\alpha$ would overshoot the values in the Q-table. Note that for the same learning rates the learning curves of Q-learning and SARSA look similar, indicating that the learning rate dominated the learning process compared to the approach used to update the Q-table.
 
 \subsection{Back-up: Depth of target}\label{subsec:discussion_backup_depth
 
 \autoref{fig:back_up_depth} shows the comparison between different back-up depths for N-step Q-learning, compared to the Monte Carlo approach. The figure shows the highest return for the depths of $n=1$ and $n=3$, with the 1-step approach learning the fastest initially, propagating information at every timestep, but the 3-step approach catching up quickly for more timesteps. For $n=3$, the target value includes more information about future rewards, so it has less bias than for $n=1$ (which only uses 1 real reward) but it takes longer to see improvements because fewer updates are happening per timestep, leading to the fast increase later. For $n=10$ or larger, the target update becomes to noisy, with a high variance, considering that the environment is stochastic, leading to a worse performance. But , when given enough time to converge, 10-step Q-learning has the potential to reach the optimal policy, since it uses 10 actual rewards before bootstrapping, resulting in a low bias and the most consistent rising learning curve, in contrast to the learning curves for $n=1$ and $n=3$, for which the return decreases again at about 30000 timesteps.
 
-When compared to \autoref{fig:off_on_policy}, the 1-step Q-learning seems to learn slower then when executing \autoref{alg:tabular_q_learning}. This could be because regular Q-learning updates every single timestep, while 1-step Q-learning collects a full episode first and only then updates.
+When compared to \autoref{fig:off_on_policy}, the 1-step Q-learning seems to learn slower then using \autoref{alg:tabular_q_learning}. This could be because regular Q-learning updates every single timestep, while 1-step Q-learning collects a full episode first and then updates.
 
 Coming back to on-policy versus off-policy, the N-step approach lies somewhere in between. The first n rewards are collected using the on-policy approach, resulting in a trace of rewards that reflect the current policy. But, when bootstrapping, the update uses $\text{max}_a \hat{Q}(s_{t+m}, a)$, just like in regular Q-learning.
 
 \section{Conclusion}\label{sec:conclusion}
+We have covered several methods for finding the optimal path through the created environment. Using DP is a simple method of generating an optimal policy, but requires much computational power and access to the transition probability.
 
+Regarding the Q-learning algorithm, there's no preference between the $\epsilon$-greedy and Boltzman policy, because they perform similarly (with appropriate parameters). In general, Boltzman is slightly faster in execution time.
+As for the two-goal problem, it mostly outperforms the single-goal problem, but if the second goal is more achievable it performs even remarkably better.
+
+Different back-ups can be used to update the Q-table, with an off-policy back-up generally resulting in a better learning curve. Learning-rate seems to have little influence over the which back-up is more successful. The depth of the target also affects the learning curve, with a smaller N resulting in a better learning curve for N-step Q-learning.
 
 %Include the bibliography
 \bibliography{bibliography}
 \bibliographystyle{icml2025}
+\vspace{-3mm}
 
+\clearpage
 
-
+\icmltitlerunning{Appendix}
 %Include an appendix
-\newpage
 \appendix
-
-\section{Algorithms}\label{app:algorithms}
-
-\subsection{Dynamic programming}
-Below is the pseudocode for the value iteration algorithm used to construct the $Q$-table in \autoref{subsec:dynamic_programming}.
+\subsection{Algorithms}\label{app:algorithms}
+\vspace{-2mm}
+\subsubsection{Dynamic programming}
+\vspace{-2mm}
+Below is the pseudocode for the value iteration algorithm used to construct the $Q$-table in 
+\vspace{-4mm}
+\autoref{subsec:dynamic_programming}.
 \begin{algorithm}[H]
    \caption{Tabular Q-value iteration}
    \label{alg:Q_value_iteration}
@@ -311,10 +311,13 @@ Below is the pseudocode for the value iteration algorithm used to construct the 
    \UNTIL{$\Delta < \eta$}
 \end{algorithmic}
 \end{algorithm}
+\vspace{-6mm}
 
-\subsection{Exploration}
+\subsubsection{Exploration}
+\vspace{-2mm}
 This is the general pesudo-code implemented for the Q-Learning method as mentioned in \autoref{subsec:exploration}:
 
+\vspace{-4mm}
 \begin{algorithm}[H]
    \caption{Tabular Q-learning}
    \label{alg:tabular_q_learning}
@@ -335,110 +338,12 @@ This is the general pesudo-code implemented for the Q-Learning method as mention
    \STATE \textbf{Return:} $\hat{Q}(s,a)$
 \end{algorithmic}
 \end{algorithm}
+\vspace{-6mm}
 
-As mentioned in the body of the report, the \textbf{Experimentation} part, here comes some plots and debates.
-These are sample snapshots of the running environments:
-With one goal:
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{Screenshot_99.png}
-    \caption{Agent moving with the environment in the 1 goal scenario. Preferable actions are show after every step-out}
-    \label{fig:placeholder}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{Screenshot_98.png}
-    \caption{Agent moving with the environment in one of 2 goals scenarios. Preferable actions are show after every step-out}
-    \label{fig:placeholder}
-\end{figure}
-\paragraph{Hyperparameters}
-
-These are the original values for the following hyperparameters:
-    n_timesteps = 50001
-    eval_interval = 1000
-    max_episode_length = 100
-    gamma = 1.0
-    epsilons = [0.03,0.1,0.3]
-    learning_rate = 0.1
-    temps = [0.01,0.1,1.0]
-Resulting Graph:
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{exploration_lr0p1_eps0p03-0p1-0p3_temp0p01-0p1-1_rep20_ts50001_eval1000_1.png}
-    \caption{Original hyperparameters graph}
-    \label{fig:placeholder}
-\end{figure}
-The values gradually changed for all learning rate, temperatures, and epsilon values to:
-    n_timesteps = 15001
-    eval_interval = 1000
-    max_episode_length = 100
-    gamma = 1.0
-    epsilons = [0.00001,0.0001,0.001] 
-    learning_rate = 0.7
-    temps = [0.0001,0.001,0.01] 
-Result:
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{exploration_lr0p7_eps1e-05-0p0001-0p001_temp0p0001-0p001-0p01_rep20_ts15001_eval1000.png}
-    \caption{Graph with the new assigned hyperparameters}
-    \label{fig:placeholder}
-\end{figure}
-The number of n_timestamps has decreased from 50001 to 15001, because the graph converged much faster. The oscillations and volatile behaviors have also significantly decreased. This also demonstrates that the performance of the two $\epsilon$ greedy and softmax boils down to proper choice of the $\epsilon$ and $\tau$ values. More graphs exist in the Exploration_plots of the assignment repository.
-\textbf{Two Goals:}
-As for the two goals, I tried the following locations for the second goal: 
-[3,2], [7,4], and [8,4]
-They are also terminal states, so
-when the Agent reaches it, the movement stops. This
-obviously changes the curve so much. We took the positions
- one at a time (3 experiments)
-for the second goal and a reward value of 5. The
-change is that the mean of returns, convergence speed,
-and hyperparameter effects change. But everything
-depends so much on where the second goal, and what
-its reward value are. If it is generally much more likely
-to be visited, then the Returns will orient so much to its
-reward value. Here are the three respective Graphs with their respective tuned hyperparameters.
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{exploration_2Goals(7332)_lr0p1_eps0p03-0p1-0p3_temp0p01-0p1-1_rep20_ts15001_eval1000.png}
-    \caption{Goal1: [7,3]
-    Goal2: [3,2]}
-    \label{fig:placeholder}
-\end{figure}
-Other parameters:
-Learning rate: 0.1
-\# timesteps: 15001
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{exploration_2Goals(7383)_lr0p7_eps1e-05-0p0001-0p001_temp0p01-0p05-0p1_rep20_ts100001_eval1000.png}
-    \caption{Goal1: [7,3]
-    Goal2: [8,3]}
-    \label{fig:placeholder}
-\end{figure}
-Other parameters:
-Learning rate: 0.7
-\# timesteps: 100,001 (slow convergence)
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{exploration_2Goal7374_lr0p7_eps1e-05-0p0001-0p001_temp0p0001-0p001-0p01_rep20_ts15001_eval1000.png}
-    \caption{Goal1: [7,3]
-    Goal2: [7,4]}
-    \label{fig:placeholder}
-\end{figure}
-Other parameters:
-Learning rate: 0.7
-\# timesteps: 15001
-
-As it complies with the intuition, the convergence Returns tend to be closer to the goal's Return convergence value \textbf{that is more like to be visited first}. For Goal 1 alone, this value was roughly 75. 
-Now about goal 2 position [3,2], the convergence value is nearly 0 ([3,2] is much more likely to be visited first). 
-About goal 2 position [7,4], the convergence value is around 10 ([7,4] is still a bit more likely to be visited first due to the winds)
-About goal 2 position [8,3], the convergence value is nearly 60 ([8,4] is a bit less likely to be visited first this time)
-
-
-\subsection{On-policy vs off-policy}
-Here is the pseudocode for the SARSA algorithm as described in \autoref{subsec:backup_on_off}:
+\subsubsection{On-policy vs off-policy}
+\vspace{-2mm}
+The pseudocode for SARSA as described in \autoref{subsec:backup_on_off}:\\
+\vspace{-4mm}
 \begin{algorithm}[H]
 \caption{Tabular SARSA}
 \label{alg:SARSA}
@@ -462,9 +367,12 @@ Here is the pseudocode for the SARSA algorithm as described in \autoref{subsec:b
    \STATE \textbf{Return} $\hat{Q}(s, a)$
 \end{algorithmic}
 \end{algorithm}
+\vspace{-3mm}
 
-\subsection{Depth of target}
-This shows the pesudo-code for the N-step Q-Learning method and Monte Carlo, as mentioned in \autoref{subsec:exploration}.
+\subsubsection{Depth of target}
+Pseudo-code for N-step Q-Learning and Monte Carlo, as mentioned in 
+\autoref{subsec:exploration}:
+\vspace{-3mm}
 \begin{algorithm}[H]
 \caption{N-step Q-learning}
 \label{alg:N_step_q_learning}
@@ -522,7 +430,8 @@ This shows the pesudo-code for the N-step Q-Learning method and Monte Carlo, as 
 \end{algorithmic}
 \end{algorithm}
 
-\section{Supplementary graphs: Dynamic programming}\label{app:sup_graphs}
+\vspace{5cm}
+\subsection{Supplementary graphs: DP}\label{app:sup_graphs}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{Figures/step1_VI_at_begining.pdf}
@@ -551,5 +460,156 @@ This shows the pesudo-code for the N-step Q-Learning method and Monte Carlo, as 
     \label{fig:DP_other_goal}
 \end{figure}
 
+\subsection{Exploration:}
+\subsubsection{Hyperparameter tuning} \label{app:hyperparameter_tuning}
+As mentioned in the body of the report, the \textbf{Experimentation} part, here comes some plots and debates.
+These are sample snapshots of the running environments:
+With one goal:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Screenshot_99.png}
+    \caption{Agent moving with the environment in the 1 goal scenario. Preferable actions are show after every step-out}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Screenshot_98.png}
+    \caption{Agent moving with the environment in one of 2 goals scenarios. Preferable actions are show after every step-out}
+    \label{fig:placeholder}
+\end{figure}
+\subparagraph{Hyperparameters}
+These are the original values for the following hyperparameters:
+\begin{verbatim}
+    n_timesteps        = 50001
+    eval_interval      = 1000
+    max_episode_length = 100
+    gamma              = 1.0
+    epsilons           = [0.03,0.1,0.3]
+    learning_rate      = 0.1
+    temps              = [0.01,0.1,1.0]
+\end{verbatim}
+
+    
+Resulting Graph:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{exploration_lr0p1_eps0p03-0p1-0p3_temp0p01-0p1-1_rep20_ts50001_eval1000_1.png}
+    \vspace{-8mm}
+    \caption{Original hyperparameters graph}
+    \label{fig:placeholder}
+\end{figure}
+The values gradually changed for all learning rate, temperatures, and epsilon values to:
+\begin{verbatim}
+    n_timesteps        = 15001
+    eval_interval      = 1000
+    max_episode_length = 100
+    gamma              = 1.0
+    epsilons           = [1e-5,1e-4,1e-3] 
+    learning_rate      = 0.7
+    temps              = [1e-4,1e-3,0.01] 
+\end{verbatim}
+Result:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{exploration_lr0p7_eps1e-05-0p0001-0p001_temp0p0001-0p001-0p01_rep20_ts15001_eval1000.png}
+    \vspace{-8mm}
+    \caption{Graph with the new assigned hyperparameters, 
+    also demonstrating that with good enough values for both $\epsilon$ and $\tau$ , they perform similarly }
+    \label{fig:tuned_exploration_hp}
+    \label{fig:placeholder}
+\end{figure}
+\vspace{-4mm}
+The number of n\_timestamps has decreased from 50001 to 15001, because the graph converged much faster. The oscillations and volatile behaviours have also significantly decreased. This also demonstrates that the performance of the two $\epsilon$ greedy and softmax boils down to proper choice of the $\epsilon$ and $\tau$ values. More graphs exist in the Exploration\_plots of the assignment repository.
+\subsubsection{Exploration - Two Goals:} \label{app:exploration_twogoals_tuning}
+\vspace{-2mm}
+As for the two goals, I tried the following locations for the second goal: 
+[3,2], [7,4], and [8,4]
+They are also terminal states, so
+when the Agent reaches it, the movement stops. This
+obviously changes the curve so much. We took the positions
+ one at a time (3 experiments)
+for the second goal and a reward value of 5. The
+change is that the mean of returns, convergence speed,
+and hyperparameter effects change. But it also depends so much on where the second goal is, and what its reward value (for mean of returns) also is. \\
+Some facts about two-goals scenario (in comparison with the one-goal scenario):
+\begin{enumerate}
+\vspace{-2mm}
+    \item The two-goal scenario generally mostly outperforms the one-goal scenario, because now there are two terminal states with a higher likelihood to be visited.
+    \vspace{-2mm}
+    \item If the second goal is generally much more likely
+to be visited, then the Returns will orient so much to its
+reward value. Here are the three respective Graphs with their respective tuned hyperparameters.
+\end{enumerate}
+\vspace{-4mm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{exploration_2Goals(7332)_lr0p1_eps0p03-0p1-0p3_temp0p01-0p1-1_rep20_ts15001_eval1000.png}
+    \vspace{-8mm}
+    \caption{Goal1: [7,3]
+    Goal2: [3,2]}
+    \label{fig:additional_goal_1}
+\end{figure}
+\vspace{-4mm}
+Other parameters:
+Learning rate: 0.1
+\# timesteps: 15001
+
+\vspace{-4mm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{exploration_2Goals(7383)_lr0p7_eps1e-05-0p0001-0p001_temp0p01-0p05-0p1_rep20_ts100001_eval1000.png}
+    \vspace{-8mm}
+    \caption{Goal1: [7,3]
+    Goal2: [8,3]}
+    \label{fig:additional_goal_2}
+\end{figure}
+\vspace{-5mm}
+Other parameters:
+Learning rate: 0.7
+\# timesteps: 100,001 (slow convergence)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{exploration_2Goal7374_lr0p7_eps1e-05-0p0001-0p001_temp0p0001-0p001-0p01_rep20_ts15001_eval1000.png}
+    \vspace{-8mm}
+    \caption{Goal1: [7,3]
+    Goal2: [7,4]}
+    \label{fig:additional_goal_3}
+\end{figure}
+\vspace{-4mm}
+Other parameters:
+Learning rate: 0.7
+\# timesteps: 15001
+
+As it complies with the intuition, the Returns of convergence tend to be closer to the goal's Return convergence value \textbf{that is more likely to be visited first}. For Goal 1 alone, this value was roughly 75. 
+Now about goal 2 position [3,2], the convergence value is nearly 0 ([3,2] is much more likely to be visited first). 
+About goal 2 position [7,4], the convergence value is around 10 ([7,4] is still a bit more likely to be visited first due to the winds)
+About goal 2 position [8,3], the convergence value is nearly 60 ([8,4] is a bit less likely to be visited first this time)
+
+\item The performance also so much depends on the visit likelihood of the second goal. With higher likelihood, the whole scenario converges faster.
+\item Although I said this scenario performs better, the hyperparameters often need to be readjusted for the problem to perform well
+
+\subparagraph{Important note about hyperparameters}
+\begin{enumerate}
+    \item The initial amount of hyperparameters was very conservative, which I believe needs to be so. But as expected, I was mostly able to attain very satisfactory results with less conservative parameters. For example, instead of 20 repetitions, 10 repetitions were also very good. Or 15001 timesteps instead of 50001.
+    \item Other parameters seriously needed adjustment. Including learning  and exploration rates which are the most prominent ones respectively.
+\end{enumerate}
 
 \end{document}
+
+Removed theory:
+Let's cover some terms that will be used throughout this work. An agent will make a sequence of actions to traverse an environment and reach a goal. Such a problem is therefore also called a Sequential Decision Problem (SDP). Though in real life, humans often let their experience of previous decisions lead their following decisions this is not the case in Markov Decisions Processes (MDPs). In MDPs the next action taken is solely based on the information available at a given state. By tackling an SDP using an MDP allows us to straightforwardly model an agent's behaviour. To model an SDP as an MDP the following things are needed: the actions the agent can take (the action space $A$), the states the environment can be in (the state space $S$), the rewards associated with each state $r_s$, the probability to transition from one state ($s$) to another ($s'$), given an action ($a$) denoted by $T(s'|a,s)$ and a discount factor $\gamma$ which decides how much future possible rewards are weighted into the decision making process. So how do we use this information to decide what are good actions to take? First we need to know what the return $R$ means. It is given by the following equation:
+\begin{equation}
+    R = \sum_{i=0}^N r_i \gamma^i
+    \label{eq:return}
+\end{equation}
+With $N$ the number of steps taken by the agent and $r_i$ the reward received at time step $i$. This leads us to the state-action value function $Q(s,a)$. This is the expected return $R$ if a given policy $\pi(a|s)$ is used to decide what action to take after being in state $s$ and taking action $a$. Or, in equation form
+\begin{equation}
+    Q^\pi(s,a) = \mathds{E}\left[\sum_{i=0}^N\gamma^i \cdot r_{t+i}|s_t=s,a_t=a\right]
+    \label{eq:state_action_value}
+\end{equation}
+With $r_t$ the reward received, $s_t$ the environment state and $a_t$ the action taken at timestep $t$. The goal is to find the optimal policy which maximises this expected return, or
+\begin{equation}
+    \pi^\star = \arg\max_{a\in A} Q^\star(s,a)
+    \label{eq:RL_goal}
+\end{equation}
